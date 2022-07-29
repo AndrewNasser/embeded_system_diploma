@@ -1,0 +1,16 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int factorial(int i){
+if(i!=1)
+  return  i=i*factorial(i-1);
+ }
+int main(){
+int x;
+printf("input your number  ");
+scanf("%d",&x);
+printf("factorial of %d is %d",x,factorial(x));
+    return 0;
+
+    }
