@@ -1,0 +1,43 @@
+#include "stdio.h"
+#include"string.h"
+/*program sum two complex by passing struct to fun
+*/
+typedef struct Sum_complex{
+
+	float real;
+	float imag;
+} complex;
+complex sum(complex a,complex b){
+ complex temp;
+ temp.real=a.real+b.real;
+ temp.imag=a.imag+b.imag;
+ return (temp);
+
+
+}
+int main(){
+	complex a,b,temp;
+
+printf("your number by real then imagine respectively  ");
+fflush(stdin);fflush(stdout);
+scanf("%f %f",&a.real,&a.imag);
+printf("your second number by real then imagine respectively ");
+fflush(stdin);fflush(stdout);
+scanf("%f %f",&b.real,&b.imag);
+temp=sum(a,b);
+printf("summation is %f %f ",temp.real,temp.imag);
+
+
+
+    return 0;
+
+    }
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,26 @@
+/*Write a program in C to print all the alphabets using a pointer. Go 
+to the editor*/
+#include "stdio.h"
+#include"string.h"
+
+
+int main(){
+char arr[27];
+char *p;
+int x;
+p=arr;
+for (x=0;x<26;x++){
+	*p=x+'A';
+	p++;
+}
+p=arr;
+printf("the alphapet is  \n");
+for (x=0;x<26;x++){
+	printf("%c   ",*p);
+	p++;
+}
+
+
+
+return 0;
+}
