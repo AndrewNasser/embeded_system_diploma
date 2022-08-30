@@ -1,0 +1,23 @@
+startup.o
+        U main
+00000000 T reset
+00000008 t stop
+
+
+ .elf file
+0001000c T main
+00010000 T reset
+000110e0 D stack_top
+00010008 t stop
+0001007c D string_buffer
+0001002c T Uart_Send_String
+
+
+uart.o
+00000000 T Uart_Send_String
+
+
+app.o
+00000000 T main
+00000000 D string_buffer
+         U Uart_Send_String
