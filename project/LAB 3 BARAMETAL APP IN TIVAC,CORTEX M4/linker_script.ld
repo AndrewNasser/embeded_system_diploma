@@ -19,6 +19,7 @@ SECTIONS
 	.bss : {
 		_S_bss = . ;
 		*(.bss*)
+		. = ALIGN(4);
 		_E_bss = . ;
 	}> sram
 }

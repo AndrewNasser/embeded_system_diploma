@@ -8,7 +8,7 @@ typedef volatile unsigned int vuint32_t ;
 int main()
 {
 		volatile unsigned long counter ;
-		SYSCTL_RCGC2_R = 0x20;
+		SYSCTL_RCGC2_R = 0x00000020;
 		//delay to make sure gpio is up and run
 		for(counter=0 ; counter<200;counter++);
 		GPIO_PORTF_DIR_R |= 1<<3 ; 
@@ -16,9 +16,9 @@ int main()
 		while(1)
 		{
 			GPIO_PORTF_DATA_R |=1<<3 ;
-			for(counter=0 ; counter<200000;counter++)
+			for(counter=0 ; counter<2000;counter++);
 				GPIO_PORTF_DATA_R &=~(1<<3) ;
-			for(counter=0 ; counter<200000;counter++);
+			for(counter=0 ; counter<2000;counter++);
 		} 
 
 

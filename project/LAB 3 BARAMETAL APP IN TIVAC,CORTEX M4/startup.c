@@ -1,5 +1,5 @@
 #include <stdint.h>
-extern int main(void);
+extern int main();
 void Reset_Handler (void);
 void default_handler (){
 	Reset_Handler();
@@ -8,7 +8,7 @@ void NMI_Handler (void) __attribute__ ((weak, alias ("default_handler")));
 void H_fault_Handler (void) __attribute__ ((weak, alias ("default_handler")));
 //boking 1024 byte located by .bss through un intialized arr of int 256 elment(256*4)
 static unsigned long stack_topp[256] ;
-void ( * const global_pointer_fun_vectors[]) () __attribute__((sections(".vectors"))) =
+void ( * const global_pointer_fun_vectors[]) ()__attribute__((section(".vectors"))) =
 {
 	(void (*)())	((unsigned long)stack_topp + sizeof(stack_topp)),
 	&Reset_Handler,
