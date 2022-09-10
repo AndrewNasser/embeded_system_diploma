@@ -1,0 +1,25 @@
+#@andrew
+CC=arm-none-eabi-
+cFLAGS=-g -mcpu=cortex-m3 -mthumb -gdwarf-2
+INCS=-I .
+LIBS=
+SRC=$(wildcard *.c)
+OBJ=$(SRC:.c=.o)
+AS=$(wildcard *.s)
+ASOBJ=$(AS:.s=.o) 
+Project_name=learn_in_depth_cortex_m3
+all:	$(Project_name).bin 
+	@echo	"build done"
+startup.o:	startup.s
+	$(CC)as.exe $(cFLAGS)  $< -o $@
+%.o:	%.c
+	$(CC)gcc.exe $(cFLAGS) -c  $(INCS) $< -o $@
+$(Project_name).elf:	$(OBJ) $(ASOBJ)	
+	$(CC)ld.exe -T linker_script.ld -Map=output.map $(OBJ) $(ASOBJ) -o $@
+$(Project_name).bin:	$(Project_name).elf
+	$(CC)objcopy.exe -O binary $< $@
+clean_all:
+	rm *.o *.elf *.bin
+clean:
+	rm *.elf *.bin
+   
