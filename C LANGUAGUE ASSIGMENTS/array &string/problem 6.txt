@@ -1,0 +1,22 @@
+#include "stdio.h"
+
+
+int main()
+{
+
+	char s[100],x;
+	int i,count=0;
+	printf("enter your string\n");
+	gets(s);
+	 printf("enter letter you want frequency\n");
+	 fflush(stdin);fflush(stdout);
+	    scanf("%c",&x);
+	for(i=0;s[i]!='\0';++i){
+
+	    if(x==s[i]){
+	        ++count;
+	    }
+	}
+	printf("frequncy is %d",count);
+			    return 0;
+}

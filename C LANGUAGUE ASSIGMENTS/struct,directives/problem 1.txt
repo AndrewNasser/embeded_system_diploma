@@ -1,0 +1,32 @@
+#include "stdio.h"
+#include"string.h"
+/*program store information of student for student
+*/
+struct Sstudent{
+	char a[100];
+	int roll_number ;
+	float marks;
+};
+struct Sstudent s;
+int main(){
+
+printf("enter your name  ");
+fflush(stdin);fflush(stdout);
+scanf("%c",s.a);
+printf("enter roll number ");
+fflush(stdin);fflush(stdout);
+scanf("%d",&s.roll_number);
+printf("enter your degree  ");
+fflush(stdin);fflush(stdout);
+scanf("%f",&s.marks);
+printf("%d  %c marks is %f  ",s.roll_number,s.a,s.marks);
+
+
+
+
+    return 0;
+
+    }
+
+
+

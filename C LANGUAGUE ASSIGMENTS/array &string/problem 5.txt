@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int main(){
+int x,num,arr[30],location,i;
+printf("enter number of element");
+scanf("%d",&num);
+printf("enter the element");
+for(i=0;i<num;i++){
+    scanf("%d",&arr[i]);
+}
+printf("enter number you would searched");
+scanf("%d",&x);
+i=0;
+while(i<num&&x!=arr[i]){
+    i++;
+}
+if(i<num)
+    printf("the number found and its location %d",i+1);
+else
+    printf("the number not found");
+
+
+
+		    return (0);
+		}
