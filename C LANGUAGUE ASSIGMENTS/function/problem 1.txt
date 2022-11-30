@@ -1,0 +1,29 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int prime(int s,int z){
+
+int x,y,i,count;
+printf("enter your intervals");
+	    scanf("%d %d",&x,&y);
+for(i=x;i<=y;i++){
+    if(i%2!=0&&i%3!=0)
+      printf("%d  ",i);
+    else if(i==3||i==2)
+      printf("%d  ",i);
+
+        }
+
+ }
+int main(){
+int q,p;
+
+
+
+    prime(q,p);
+    return 0;
+
+    }
+
+

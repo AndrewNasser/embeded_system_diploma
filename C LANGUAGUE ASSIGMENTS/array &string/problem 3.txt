@@ -1,0 +1,44 @@
+
+ *  Created on: Jun 28, 2022
+ *      Author: Andrew nasser
+ */
+#include "stdio.h"
+
+
+int main()
+{
+
+	int arr1[20][20],arr2[20][20],x,y,i,j;
+	printf("enter rows and coloums\n");
+	fflush(stdin);fflush(stdout);
+	scanf("%d %d",&x,&y);
+	printf("enter matrix element");
+	for(i=0;i<x;i++){
+		for(j=0;j<y;j++){
+			printf("enter elements %d %d \n",i,j);
+			fflush(stdin);fflush(stdout);
+			scanf("%d",&arr1[i][j]);
+		}
+	}
+	printf("matrix you enterd is\n");
+	for(i=0;i<x;i++)
+		for(j=0;j<y;j++){
+	        printf("%d  ",arr1[i][j]);
+	        if(j==y-1)
+	            printf("\n\n");
+		}
+		printf("the transpose is \n");
+	for(i=0;i<x;i++)
+		for(j=0;j<y;j++){
+	    arr2[j][i]=arr1[i][j];
+		}
+	for(i=0;i<y;i++)
+		for(j=0;j<x;j++){
+	        printf("%d  ",arr2[i][j]);
+	        if(j==x-1)
+	            printf("\n\n");
+		}
+	    return 0;
+	}
+
+
