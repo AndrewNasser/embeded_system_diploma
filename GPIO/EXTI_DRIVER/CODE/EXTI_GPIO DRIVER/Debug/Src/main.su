@@ -1,0 +1,4 @@
+main.c:32:6:Clock_init	4	static
+main.c:41:6:wait_ms	24	static
+main.c:48:6:EXTI9_CALLING	8	static
+main.c:56:5:main	32	static
