@@ -1,3 +1,0 @@
-keypad.c:14:6:delay_mss	24	static
-keypad.c:21:6:Keypad_init	16	static
-keypad.c:68:6:Keypad_getkey	16	static
