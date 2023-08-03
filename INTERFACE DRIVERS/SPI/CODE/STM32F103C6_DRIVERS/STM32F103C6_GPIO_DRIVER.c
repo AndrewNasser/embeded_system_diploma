@@ -1,0 +1,281 @@
+/*
+ * STM32F103C6_GPIO_DRIVER.c
+ *
+ *  Created on: Mar 20, 2023
+ *      Author:ANDREW NASSER
+ */
+
+
+#include"STM32F103C6_GPIO_DRIVER.h"
+
+/*======================================================================================================
+ * FUNC NAME ----> GET_CRLH_POSITION
+ * BRIEF     ----> USE TO GET THE POSITION OF CRL CRH REGISTER BIT
+ * PARAM1[IN]----> NUMBER OF PIN
+ * RETAVAL	 ----> POSITION IN CR REGISTER
+ * NOTE		 ----> EACH PIN HAVE 4 BIT IN CR REGISTER
+ *
+ */
+uint8_t GET_CRLH_POSITION(uint16_t PINNUMBER){
+	switch(PINNUMBER){
+
+	case GPIO_PIN0:
+		return 0;
+		break;
+	case GPIO_PIN1:
+		return 4;
+		break;
+	case GPIO_PIN2:
+		return 8;
+		break;
+	case GPIO_PIN3:
+		return 12;
+		break;
+	case GPIO_PIN4:
+		return 16;
+		break;
+	case GPIO_PIN5:
+		return 20;
+		break;
+	case GPIO_PIN6:
+		return 24;
+		break;
+	case GPIO_PIN7:
+		return 28;
+		break;
+	case GPIO_PIN8:
+		return 0;
+		break;
+	case GPIO_PIN9:
+		return 4;
+		break;
+	case GPIO_PIN10:
+		return 8;
+		break;
+	case GPIO_PIN11:
+		return 12;
+		break;
+	case GPIO_PIN12:
+		return 16;
+		break;
+	case GPIO_PIN13:
+		return 20;
+		break;
+	case GPIO_PIN14:
+		return 24;
+		break;
+	case GPIO_PIN15:
+		return 28;
+		break;
+
+
+	}
+	return 0;
+}
+
+
+
+/*======================================================================================================
+ * FUNC NAME ----> MCAL_GPIO_INIT
+ * BRIEF     ----> INTIALIZE THE GPIO PINS ACCORDING SPECIFIC PARAMETERS IN PIN CONFIG
+ * PARAM1[IN]----> GPIOx IS POINTER TO STRUCT OF GPIO REGISTERS DEPENDING ON DEVICE USED
+ * PARAM2[IN]----> PINCONFIG IS POINTER TO STRUCT OF GPIO PIN CONFIG CONTAINS INFORMATION OF GPIO PERIPHERAL
+ * RETAVAL	 ----> NONE
+ * NOTE		 ----> NONE
+ *
+ */
+
+void MCAL_GPIO_INIT(GPIO_Typedef *GPIOx ,GPIO_PINCONFIG_T *PINCONFIG ){
+
+	uint8_t PIN_CONFIG=0;
+
+
+	//PORT CONFIG REGISTER LOW  (GPIOx_CRL) CONFIGURE PINS [0:7]
+	//PORT CONFIG REGISTER HIGH (GPIOx_CRH) CONFIGURE PINS [8:15]
+
+	volatile uint32_t *REGISTERCONFIG=NULL;
+
+	REGISTERCONFIG=(PINCONFIG->GPIO_PIN_NUMBER < GPIO_PIN8)? &GPIOx->CRL : &GPIOx->CRH;	//GPIO POINTING TO CR_LOW IF PIN NUMBER < 8 -->[0:7]
+
+	//CLEAR CNFy[1:0] & MODEy[1:0]
+	(*REGISTERCONFIG) &= ~(0xf << GET_CRLH_POSITION(PINCONFIG->GPIO_PIN_NUMBER));
+
+	//CHECK PIN IS OUTPUT TO USE MODE OF SPEED
+	if((PINCONFIG->GPIO_MODE == GPIO_MODE_PUSH_PULL) || (PINCONFIG->GPIO_MODE == GPIO_MODE_OPEN_DRAIN) || (PINCONFIG->GPIO_MODE == GPIO_MODE_AF_PUSH_PULL) || (PINCONFIG->GPIO_MODE == GPIO_MODE_AF_OPEN_DRAIN)){
+
+		/*USED -4 BECAUSE THE MODES DEFINED WHEN WE ABSTRACT 4 WE GET THE VALUE SHOULD BE AT REGISTER
+		 EXAMBLE USING PUSH PULL MODE FROM MACROS 0x00000004 - 4 = 0x00000000 RHAT WHAT WE WANT ACCORDING SPICS*/
+
+		PIN_CONFIG=((((PINCONFIG->GPIO_MODE - 4) <<2 )|(PINCONFIG->GPIO_SPEED_OUTPUT)) &0x0f);
+	}
+	//THAT THE PIN IS INPUT & MODE OF SPEED AT RESET STATE
+	else{
+		if((PINCONFIG->GPIO_MODE==GPIO_MODE_ANALOG) || (PINCONFIG->GPIO_MODE==GPIO_MODE_FLOATING) ){
+			PIN_CONFIG=((((PINCONFIG->GPIO_MODE) <<2 )) & 0x0f);
+		}else if (PINCONFIG->GPIO_MODE == GPIO_MODE_AF_INPUT )		//CONSIDER ALTERNATIVE FUNCTIO AS INPUT FLOATING
+		{
+			PIN_CONFIG=(((GPIO_MODE_FLOATING )) & 0x0f);
+
+		}
+		else  //PULL UP PELL DOWN INPUT MODE
+		{
+			PIN_CONFIG=(((GPIO_MODE_PULLUP)| 0x0) & 0x0f);
+			//FROM TABLE 20 REFERED TO ODR REGISTER IS( 0 @ PULL UP) & (1 @ PULL DOWN)
+			if(PINCONFIG->GPIO_MODE == GPIO_MODE_PULLUP)
+			{
+				GPIOx->ODR |= PINCONFIG->GPIO_PIN_NUMBER;
+
+			}else {
+				GPIOx->ODR &= ~(PINCONFIG->GPIO_PIN_NUMBER);
+
+			}
+
+		}
+
+	}
+	(*REGISTERCONFIG) |= ((PIN_CONFIG) << GET_CRLH_POSITION(PINCONFIG->GPIO_PIN_NUMBER));
+
+}
+
+
+/*==================================================================================================
+ * FUNC NAME ----> MCAL_GPIO_DEINIT
+ * BRIEF     ----> RESET THE GPIO
+ * PARAM1[IN]----> GPIOx IS POINTER TO STRUCT OF GPIO REGISTERS DEPENDING ON DEVICE USED
+ * RETAVAL	 ----> NONE
+ * NOTE		 ----> NONE
+ *
+ */
+
+
+void MCAL_GPIO_DEINIT(GPIO_Typedef *GPIOx ){
+	GPIOx->CRL =   0x44444444;
+	GPIOx->CRH =   0x44444444;
+	GPIOx->ODR =   0x00000000;
+	GPIOx->BRR =   0x00000000;
+	GPIOx->BSSR =  0x00000000;
+	GPIOx->LCKR =  0x00000000;
+
+
+}
+
+/*===================================================================================================
+ * FUNC NAME ----> MCAL_GPIO_READPIN
+ * BRIEF     ----> READ THE GPIO PINS ACCORDING SPECIFIC PARAMETERS IN PIN CONFIG
+ * PARAM1[IN]----> GPIOx IS POINTER TO STRUCT OF GPIO REGISTERS DEPENDING ON DEVICE USED
+ * PARAM2[IN]----> PIN_NUMBER WHICH SELECTED 0: 15 ACCORDING GPIO PINS DEFINED
+ * RETAVAL	 ----> THE INPUT PIN VALUE (TWO VALUES BASED ON GPIO INPUT PIN STATE)
+ * NOTE		 ----> NONE
+ *
+ */
+uint8_t MCAL_GPIO_READPIN(GPIO_Typedef *GPIOx ,uint16_t PIN_NUMBER ){
+	uint8_t BIT_STATUS;
+	if(((GPIOx->IDR)& PIN_NUMBER) !=(uint16_t)GPIO_PIN_RESET) 	//MASKED WHICH NOT READ ZERO THAT MEAN IT READ ONE
+	{
+		BIT_STATUS=GPIO_PIN_SET;
+
+	}else{
+		BIT_STATUS=GPIO_PIN_RESET;
+	}
+	return BIT_STATUS;
+}
+
+/*===================================================================================================
+ * FUNC NAME ----> MCAL_GPIO_READPORT
+ * BRIEF     ----> READ THE GPIO INPUT PORTS ACCORDING SPECIFIC PARAMETERS IN PIN CONFIG
+ * PARAM1[IN]----> GPIOx IS POINTER TO STRUCT OF GPIO REGISTERS DEPENDING ON DEVICE USED
+ * RETAVAL	 ----> THE INPUT PORT VALUE
+ * NOTE		 ----> NONE
+ *
+ */
+
+uint16_t MCAL_GPIO_READPORT(GPIO_Typedef *GPIOx){
+	uint16_t PORT_VAL;
+	PORT_VAL =(uint16_t)GPIOx->IDR;
+	return PORT_VAL;
+}
+
+
+/*======================================================================================================
+ * FUNC NAME ----> MCAL_GPIO_WRITEPIN
+ * BRIEF     ----> WRITE THE GPIO PINS ACCORDING SPECIFIC PARAMETERS IN PIN CONFIG
+ * PARAM1[IN]----> GPIOx IS POINTER TO STRUCT OF GPIO REGISTERS DEPENDING ON DEVICE USED
+ * PARAM2[IN]----> PIN_NUMBER WHICH SELECTED 0: 15 ACCORDING GPIO PINS DEFINED
+ * PARAM3[IN]----> VALUE WHICH WRITE AT PIN
+ * RETAVAL	 ----> NONE
+ * NOTE		 ----> NONE
+ *
+ */
+
+void MCAL_GPIO_WRITEPIN(GPIO_Typedef *GPIOx ,uint16_t PIN_NUMBER , uint8_t VAL ){
+	if(VAL != GPIO_PIN_RESET){
+		//GPIOx->ODR |= PIN_NUMBER;
+		GPIOx->BSSR = PIN_NUMBER;     	  //0: No action on the corresponding ODRx bit  1: Reset the corresponding ODRx bi
+
+	}else{
+		GPIOx->BRR = PIN_NUMBER;		 //0: No action on the corresponding ODRx bit  1: Reset the corresponding ODRx bi
+	}
+}
+
+
+
+
+/*======================================================================================================
+ * FUNC NAME ----> MCAL_GPIO_WRITEPORT
+ * BRIEF     ----> WRITE THE GPIO PORT ACCORDING SPECIFIC PARAMETERS IN PIN CONFIG
+ * PARAM1[IN]----> GPIOx IS POINTER TO STRUCT OF GPIO REGISTERS DEPENDING ON DEVICE USED
+ * PARAM2[IN]----> VALUE WHICH WRITE AT PIN
+ * RETAVAL	 ----> NONE
+ * NOTE		 ----> NONE
+ *
+ */
+
+void MCAL_GPIO_WRITEPORT(GPIO_Typedef *GPIOx, uint16_t VAL ){
+		GPIOx->ODR = (uint16_t)VAL;
+
+}
+
+
+
+/*======================================================================================================
+ * FUNC NAME ----> MCAL_GPIO_TOGGLEPIN
+ * BRIEF     ----> TOGGLE THE GPIO PIN ACCORDING SPECIFIC PARAMETERS IN PIN CONFIG
+ * PARAM1[IN]----> GPIOx IS POINTER TO STRUCT OF GPIO REGISTERS DEPENDING ON DEVICE USED
+ * PARAM2[IN]----> PIN_NUMBER WHICH SELECTED 0: 15 ACCORDING GPIO PINS DEFINED
+ * RETAVAL	 ----> NONE
+ * NOTE		 ----> NONE
+ *
+ */
+void MCAL_GPIO_TOGGLEPIN(GPIO_Typedef *GPIOx ,uint16_t PIN_NUMBER){
+		GPIOx->ODR ^= (PIN_NUMBER);
+}
+
+
+/*======================================================================================================
+ * FUNC NAME ----> MCAL_GPIO_LOCKPIN
+ * BRIEF     ----> LOCKED THE GPIO PIN ACCORDING SPECIFIC PARAMETERS IN PIN CONFIG
+ * PARAM1[IN]----> GPIOx IS POINTER TO STRUCT OF GPIO REGISTERS DEPENDING ON DEVICE USED
+ * PARAM2[IN]----> PIN_NUMBER WHICH SELECTED 0: 15 ACCORDING GPIO PINS DEFINED
+ * RETAVAL	 ----> PIN IS LOCKED OR THERE IS ERROR IN PIN LOCKED (ACCORDING TO REFF GPIO RETURN LOCK)
+ * NOTE		 ----> NONE
+ *
+ */
+
+uint8_t MCAL_GPIO_LOCKPIN(GPIO_Typedef *GPIOx ,uint16_t PIN_NUMBER){
+	volatile uint32_t TEMP = 1<<16;			//USED TO SET LCKK[16]
+	TEMP |= PIN_NUMBER;						//USED TO SET THE LCKY AS WRITE 1
+	GPIOx->LCKR = TEMP;						//TO WRITE 1 AT SEQUENCE
+	GPIOx->LCKR = PIN_NUMBER;				//TO WRITE 0 AT SEQUENCE
+	GPIOx->LCKR = TEMP;						//TO WRITE 1 AGAIN AT SEQUENCE
+	TEMP = GPIOx->LCKR;						// TO READ FROM REGISTER BIT 16
+	//READ ONE -------> LOCKED PIN IS DONE
+	if((uint16_t)(GPIOx->LCKR & 1<<16)){
+		return GPIO_PIN_LOCKED_DONE;
+	}else{
+		return GPIO_PIN_LOCKED_ERROR;
+	}
+
+}
+
+
+
