@@ -1,0 +1,22 @@
+/*
+ * SERVO_MOTOR.c
+ *
+ * Created: 9/15/2023 9:43:30 AM
+ *  Author: ANDREW NASSER
+ */ 
+#include <HEADERS.h>
+
+
+void SERVO_INIT(void)
+{
+	PWM_CONFIG_T CONFIG={FAST_PWM,PWM_OCIE_DISABLE,PWM_TOIE_DISABLE,PWM_PRESC_CLCK8,PWM_INVERTING};
+		PWM_INIT(&CONFIG);
+}
+void SERVO_ANGLE(uint8_t angle)
+{
+	
+	PWM_GET_CMP_VALUE(angle);
+}
+void SERVO_DEINIT(void){
+	PWM_STOP();
+}
