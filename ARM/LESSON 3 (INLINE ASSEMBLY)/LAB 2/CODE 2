@@ -1,0 +1,10 @@
+RESET	;CPU ENTRY POINT
+		mov		r0,#5	;to store 5 in register r0 , # used for constant value
+		bl		main		;branch label to main
+main
+		mov		r2,#0x100		;put the address0x100 onto r2
+		str		r0,[r2]		;store value which in r0 to address which r2 point to
+		ldr		r3,[r2]		;load value which r2 point to to r3
+		STRB		r0,[r2,#0x1]	;store bit which in r0 to (base address 0x100 + offset 0x1) in r2
+		STRB		r0,[r2,#0x2]
+		STRB		r0,[r2,#0x3]

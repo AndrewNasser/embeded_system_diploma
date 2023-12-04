@@ -1,0 +1,12 @@
+RESET	;CPU ENTRY POINT
+			mov		r0,#5	;to store 5 in register r0 , # used for constant value
+			bl		main		;branch label to main
+main
+			bl		Subtract			;branch to subtract function
+			bl		termination		;branch to termination
+Subtract
+			sub		r0,r0,#1		;subtract 1 from r0 then put value inr0 again.
+			cmp		r0,#0		;to compare between value in r0 and 0.
+			bne		Subtract		;after compare if r0 not equal 0 branched to subtract func again.
+			mov		pc,lr		;after conditions return back to address which it branched for subtract from main.
+termination
